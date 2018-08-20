@@ -1,2 +1,2 @@
-cdef extern from "libvmmapi/libvmmapi.h":
+cdef extern from "libvmmapi.h":
     extern int vm_create(const char *name)

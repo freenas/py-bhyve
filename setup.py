@@ -17,7 +17,7 @@ if 'FREEBSD_SRC' not in os.environ:
 
 system_includes = [
     #'${FREEBSD_SRC}/lib/libvmm',
-    '/usr/src/freebsd/lib/libvmm',
+    '/usr/src/lib/libvmmapi',
 ]
 
 system_includes = [os.path.expandvars(x) for x in system_includes]
