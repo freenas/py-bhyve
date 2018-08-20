@@ -12,7 +12,7 @@ except ImportError:
 
 
 if 'FREEBSD_SRC' not in os.environ:
-    os.environ['FREEBSD_SRC'] = '/usr/src/freebsd'
+    os.environ['FREEBSD_SRC'] = '/usr/src/'
 
 
 system_includes = [
@@ -32,7 +32,7 @@ setup(
         Extension(
             'bhyve',
             ['bhyve.pyx'],
-            libraries=['bhyve', 'libvmmapi', 'bhyvectl'],
+            libraries=['vmmapi'],
             cython_include_dirs=['./pxd'],
             include_dirs=system_includes
         )
