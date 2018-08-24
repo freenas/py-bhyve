@@ -12,12 +12,13 @@ except ImportError:
 
 
 if 'FREEBSD_SRC' not in os.environ:
-    os.environ['FREEBSD_SRC'] = '/usr/src/'
+    os.environ['FREEBSD_SRC'] = '/usr/src'
 
 
 system_includes = [
     '${FREEBSD_SRC}/lib/libvmmapi',
     '${FREEBSD_SRC}/sys/amd64/include',
+    '${FREEBSD_SRC}/sys'
 ]
 
 system_includes = [os.path.expandvars(x) for x in system_includes]

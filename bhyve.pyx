@@ -1,4 +1,5 @@
 cimport bhyve
+cimport types
 cimport vmm
 
 import enum
@@ -52,9 +53,9 @@ cdef class VM:
 
     def get_stats(self, int vcpu=0):
         cdef bhyve.timeval tv
-        cdef int num_stats, *stats, i = 0
+        cdef int num_stats, i = 0
+        cdef types.uint64_t *stats
         cdef const char *desc
-        # TODO: Introduce uint64 type to this module
         # TODO: Refine the code
         # TODO: Check for undefined behavior with different scenarios
         # TODO: Implement this in middlewared and make sure there is no undefined behaviour
