@@ -4,15 +4,18 @@ cimport vmm
 
 import enum
 
+from libc.errno cimport errno
+from libc.stdlib cimport free
+
 
 class Error(enum.IntEnum):
-    SUCCESS = 0
-    OPEN_FAILED = -1
+    OPEN_FAILED = 1
+    STATS_FETCH_FAILED = 2
 
 
 class BhyveException(RuntimeError):
     def __init__(self, code, message):
-        super(BhyveException, self).__init__(message)
+        super(BhyveException, self).__init__(f'[Errorno {code}] {message}')
         self.code = code
 
 cdef class VM:
@@ -24,20 +27,22 @@ cdef class VM:
         self.vm_name = vm_name
 
         if create_vm:
-            bhyve.vm_create(vm_name.encode())
-            print('vm has been created ', vm_name)
+            if bhyve.vm_create(vm_name.encode()) != 0:
+                raise BhyveException(
+                    errno, f'Failed to create VM {vm_name}'
+                )
 
         self.vm = bhyve.vm_open(vm_name.encode())
         if self.vm == NULL:
             raise BhyveException(
-                Error.OPEN_FAILED, f'Could not open vm {vm_name}'
+                Error.OPEN_FAILED, f'Could not open VM {vm_name}'
             )
 
     def force_reset(self):
         error = bhyve.vm_suspend(self.vm, vmm.VM_SUSPEND_RESET)
         if error:
             raise BhyveException(
-                error, f'Error occurred with code: {error}'
+                errno, f'Could not force reset'
             )
 
         return True
@@ -46,7 +51,7 @@ cdef class VM:
         error = bhyve.vm_suspend(self.vm, vmm.VM_SUSPEND_POWEROFF)
         if error:
             raise BhyveException(
-                error, f'Error occurred with code: {error}'
+                errno, f'Could not force poweroff'
             )
 
         return True
@@ -56,10 +61,6 @@ cdef class VM:
         cdef int num_stats, i = 0
         cdef types.uint64_t *stats
         cdef const char *desc
-        # TODO: Refine the code
-        # TODO: Check for undefined behavior with different scenarios
-        # TODO: Implement this in middlewared and make sure there is no undefined behaviour
-        # TODO: Add detailed error logging
         stats = bhyve.vm_get_stats(self.vm, vcpu, &tv, &num_stats)
         stat_list = []
 
@@ -70,12 +71,21 @@ cdef class VM:
                     'value': stats[i]
                 })
                 i += 1
+        else:
+            raise BhyveException(
+                Error.STATS_FETCH_FAILED, 'Failed to fetch stats'
+            )
 
         return stat_list
 
     def destroy(self):
         bhyve.vm_destroy(self.vm)
-        print('destroyed vm - ', self.vm_name)
+
+    def __dealloc__(self):
+        free(self.vm)
+
+    def __str__(self):
+        return f'VM {self.vm_name}'
 
 
 def get_vm(str name):
