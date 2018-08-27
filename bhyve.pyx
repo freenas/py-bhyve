@@ -27,19 +27,24 @@ cdef class VM:
         self.vm_name = vm_name
 
         if create_vm:
-            if bhyve.vm_create(vm_name.encode()) != 0:
-                raise BhyveException(
-                    errno, f'Failed to create VM {vm_name}'
-                )
+            with nogil:
+                if bhyve.vm_create(vm_name.encode()) != 0:
+                    raise BhyveException(
+                        errno, f'Failed to create VM {vm_name}'
+                    )
 
-        self.vm = bhyve.vm_open(vm_name.encode())
+        with nogil:
+            self.vm = bhyve.vm_open(vm_name.encode())
+
         if self.vm == NULL:
             raise BhyveException(
                 Error.OPEN_FAILED, f'Could not open VM {vm_name}'
             )
 
     def force_reset(self):
-        error = bhyve.vm_suspend(self.vm, vmm.VM_SUSPEND_RESET)
+        with nogil:
+            error = bhyve.vm_suspend(self.vm, vmm.VM_SUSPEND_RESET)
+
         if error:
             raise BhyveException(
                 errno, f'Could not force reset'
@@ -48,7 +53,9 @@ cdef class VM:
         return True
 
     def force_poweroff(self):
-        error = bhyve.vm_suspend(self.vm, vmm.VM_SUSPEND_POWEROFF)
+        with nogil:
+            error = bhyve.vm_suspend(self.vm, vmm.VM_SUSPEND_POWEROFF)
+
         if error:
             raise BhyveException(
                 errno, f'Could not force poweroff'
@@ -61,7 +68,10 @@ cdef class VM:
         cdef int num_stats, i = 0
         cdef types.uint64_t *stats
         cdef const char *desc
-        stats = bhyve.vm_get_stats(self.vm, vcpu, &tv, &num_stats)
+
+        with nogil:
+            stats = bhyve.vm_get_stats(self.vm, vcpu, &tv, &num_stats)
+
         stat_list = []
 
         if stats != NULL:
@@ -79,7 +89,8 @@ cdef class VM:
         return stat_list
 
     def destroy(self):
-        bhyve.vm_destroy(self.vm)
+        with nogil:
+            bhyve.vm_destroy(self.vm)
 
     def __dealloc__(self):
         free(self.vm)
