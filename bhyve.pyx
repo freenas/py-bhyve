@@ -3,14 +3,15 @@ cimport types
 cimport vmm
 
 import enum
+import os
 
 from libc.errno cimport errno
 from libc.stdlib cimport free
 
 
 class Error(enum.IntEnum):
-    OPEN_FAILED = 1
-    STATS_FETCH_FAILED = 2
+    OPEN_FAILED = 100
+    STATS_FETCH_FAILED = 101
 
 
 class BhyveException(RuntimeError):
@@ -34,7 +35,7 @@ cdef class VM:
 
             if code != 0:
                 raise BhyveException(
-                    errno, f'Failed to create VM {self.vm_name}'
+                    errno, f'Failed to create VM {self.vm_name} - {os.strerror(errno)}'
                 )
 
         with nogil:
@@ -51,7 +52,7 @@ cdef class VM:
 
         if error:
             raise BhyveException(
-                errno, f'Could not force reset'
+                errno, os.strerror(errno)
             )
 
         return True
@@ -62,12 +63,18 @@ cdef class VM:
 
         if error:
             raise BhyveException(
-                errno, f'Could not force poweroff'
+                errno, os.strerror(errno)
             )
 
         return True
 
     def get_stats(self, int vcpu=0):
+        # TODO: Modify this to support stats for all vcpus
+        if not -1 < vcpu < 16:
+            raise BhyveException(
+                Error.STATS_FETCH_FAILED, 'Please specify a vcpu number from 1-16'
+            )
+
         cdef bhyve.timeval tv
         cdef int num_stats, i = 0
         cdef types.uint64_t *stats
