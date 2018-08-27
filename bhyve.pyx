@@ -23,22 +23,26 @@ cdef class VM:
     cdef str vm_name
     cdef bhyve.vmctx* vm
 
-    def __cinit__(self, str vm_name, bint create_vm=0):
-        self.vm_name = vm_name
+    def __cinit__(self, str vm_name_p, bint create_vm=0):
+        self.vm_name = vm_name_p
+        vm_name_bytes = vm_name_p.encode()
+        cdef char* vm_name = vm_name_bytes
 
         if create_vm:
             with nogil:
-                if bhyve.vm_create(vm_name.encode()) != 0:
-                    raise BhyveException(
-                        errno, f'Failed to create VM {vm_name}'
-                    )
+                code = bhyve.vm_create(vm_name)
+
+            if code != 0:
+                raise BhyveException(
+                    errno, f'Failed to create VM {self.vm_name}'
+                )
 
         with nogil:
-            self.vm = bhyve.vm_open(vm_name.encode())
+            self.vm = bhyve.vm_open(vm_name)
 
         if self.vm == NULL:
             raise BhyveException(
-                Error.OPEN_FAILED, f'Could not open VM {vm_name}'
+                Error.OPEN_FAILED, f'Could not open VM {self.vm_name}'
             )
 
     def force_reset(self):

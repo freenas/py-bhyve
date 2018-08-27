@@ -2,7 +2,7 @@ cimport types
 cimport vmm
 
 
-cdef extern from 'vmmapi.h':
+cdef extern from 'vmmapi.h' nogil:
     cdef struct vmctx:
         pass
 
