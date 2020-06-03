@@ -11,10 +11,14 @@ except ImportError:
 
 if 'ILLUMOS_SRC' not in os.environ:
     #os.environ['ILLUMOS_SRC'] = '/usr/src'
-    print("Error: ILLUMOS_SRC must point towards the illumos-gate source tree")
-    exit 1
+    print("Error: ILLUMOS_SRC must point towards the illumos-gate source tree (and usr/src inside that)")
+    exit(1)
 
-os.symlink('/lib/amd64/libvmmapi.so.1', './libvmmapi.so')
+try:
+    os.symlink('/lib/amd64/libvmmapi.so.1', './libvmmapi.so')
+except FileExistsError:
+    pass
+
 
 # There doesn't seem to be any way to get both Cython and the linker to see the
 # library at version 1; explicit linker flags cause Cython to miss the library and
