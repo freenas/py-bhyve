@@ -10,7 +10,7 @@ py-bhyve is a wrapper to encapsulate the functionality of libvmmapi.
 
 ### GitHub:
 
-The FreeBSD source tree ***must*** be located at `$SRC_BASE` (`/usr/src` by default) to build from git.
+The FreeBSD source tree ***must*** be located at `$FREEBSD_SRC` (`/usr/src` by default) to build from git.
 
 - `python setup.py build_ext -i && python setup.py install --user`
 
@@ -24,11 +24,11 @@ The FreeBSD source tree ***must*** be located at `$SRC_BASE` (`/usr/src` by defa
 
 ## QUICK HOWTO
 
-`import bhyve as b`
+`import bhyve`
 
 Get a running VM:
 
-`vm = b.get_vm('foo')`
+`vm = bhyve.get_vm('foo')`
 
 Fetch stats for a vm:
 
