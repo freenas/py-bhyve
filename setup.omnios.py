@@ -33,13 +33,12 @@ except FileExistsError:
 # the output according to ldd is linked up correctly to /lib/amd64/libvmmapi.so.1
 
 system_includes = [
-   '${ILLUMOS_SRC}/compat/bhyve',
+   '${ILLUMOS_SRC}/compat/freebsd',
    '${ILLUMOS_SRC}/uts/i86pc', 
    '${ILLUMOS_SRC}/lib/libvmmapi/common/',
-   '${ILLUMOS_SRC}/compat/bhyve/amd64/machine/',
-   '${ILLUMOS_SRC}/../contrib/bhyve/amd64/',
-   '${ILLUMOS_SRC}/contrib/bhyve/amd64',
-   '${ILLUMOS_SRC}/compat/bhyve/amd64'
+   '${ILLUMOS_SRC}/compat/freebsd/amd64/machine/',
+   '${ILLUMOS_SRC}/../contrib/freebsd/amd64/',
+   '${ILLUMOS_SRC}/compat/freebsd/amd64',
 ]
 
 system_includes = [os.path.expandvars(x) for x in system_includes]
