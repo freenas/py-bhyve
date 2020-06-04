@@ -136,6 +136,5 @@ cdef class VM:
     def __str__(self):
         return f'VM {self.vm_name}'
 
-
 def get_vm(str name):
     return VM(name)
